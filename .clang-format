@@ -1,0 +1,70 @@
+---
+# Configuracion de formato para Proyecto Arboles
+# Basado en Google Style con ajustes para OpenGL/C++
+BasedOnStyle: Google
+Language: Cpp
+Standard: c++17
+
+# Indentacion
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# Llaves y espacios
+BreakBeforeBraces: Attach
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+
+# Alineacion
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+AlignTrailingComments: true
+
+# Punteros y referencias
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# Funciones
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+
+# Includes
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^<glad/'
+    Priority:        1
+  - Regex:           '^<GLFW/'
+    Priority:        2
+  - Regex:           '^<GL/'
+    Priority:        3
+  - Regex:           '^<.*\.h>'
+    Priority:        4
+  - Regex:           '^<.*>'
+    Priority:        5
+  - Regex:           '.*'
+    Priority:        6
+
+# Namespaces
+CompactNamespaces: false
+FixNamespaceComments: true
+
+# Comentarios
+ReflowComments: true
+SpacesBeforeTrailingComments: 2
+
+# Constructores
+ConstructorInitializerIndentWidth: 4
+BreakConstructorInitializers: BeforeColon
+
+# Acceso a miembros de clase
+AccessModifierOffset: -4
+
+# Continuacion de lineas
+ContinuationIndentWidth: 4
+IndentCaseLabels: true

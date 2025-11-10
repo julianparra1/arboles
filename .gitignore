@@ -1,0 +1,30 @@
+# Build artifacts
+build/
+arboles
+
+
+# Object files
+*.o
+*.a
+*.d
+
+# ImGui configuration
+imgui.ini
+
+# Backup files
+*~
+*.swp
+*.swo
+
+# VS Code
+.vscode/
+.cache/
+
+# Compilation database
+compile_commands.json
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+git-setup.sh

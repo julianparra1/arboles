@@ -1,0 +1,32 @@
+CompileFlags:
+  Add:
+    - "-xc++"
+    - "-std=c++17"
+    - "-Wall"
+    - "-Wextra"
+    - "-I/home/julianparra/arbol/external/glad/include"
+    - "-I/home/julianparra/arbol/external/imgui"
+    - "-I/home/julianparra/arbol/src"
+    - "-I/home/julianparra/arbol/include"
+  Compiler: clang++
+
+Diagnostics:
+  UnusedIncludes: None
+  ClangTidy:
+    Add:
+      - "modernize-*"
+      - "readability-*"
+      - "performance-*"
+    Remove:
+      - "modernize-use-trailing-return-type"
+      - "readability-magic-numbers"
+  Suppress:
+    - "readability-magic-numbers"
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
+
+Hover:
+  ShowAKA: true
