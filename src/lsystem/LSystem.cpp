@@ -1,18 +1,16 @@
-/*
- * =================================================================
- * ARCHIVO: LSystem.cpp
- * CONTENIDO: Implementacion de la clase LSystem.
- * DESCRIPCION:
- * Este archivo contiene la logica para la generacion de cadenas
- * de L-System. Implementa los metodos para cargar reglas desde
- * un archivo de texto y aplicar el algoritmo de reescritura
- * paralela (parallel rewriting) durante 'n' generaciones.
- * Esta clase no tiene dependencias de OpenGL.
+/**
+ * @file LSystem.cpp
+ * @brief Implementacion de la clase LSystem.
  *
- * AUTOR: Julian Parra
- * CURSO: Graficacion (2025)
- * PROYECTO: Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
- * =================================================================
+ * Contiene la logica para la generacion de cadenas de L-System, incluyendo
+ * metodos para cargar reglas desde configuracion y aplicar el algoritmo de
+ * reescritura paralela durante 'n' generaciones. Esta clase no tiene
+ * dependencias de OpenGL.
+ *
+ * @author Julian Parra
+ * @date 2025
+ * @course Graficacion
+ * @project Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
  */
 
 #include "LSystem.h"
@@ -172,4 +170,34 @@ void LSystem::reset() {
     currentString = axiom;
     currentGeneration = 0;
     std::cout << "L-System reiniciado al axioma.\n";
+}
+
+/*
+ * @brief Establece el axioma directamente.
+ */
+void LSystem::setAxiom(const std::string& newAxiom) {
+    axiom = newAxiom;
+    currentString = axiom;
+    currentGeneration = 0;
+}
+
+/*
+ * @brief Establece el angulo directamente.
+ */
+void LSystem::setAngle(float newAngle) {
+    angle = newAngle;
+}
+
+/*
+ * @brief Agrega una regla de produccion.
+ */
+void LSystem::addRule(char symbol, const std::string& replacement) {
+    rules[symbol] = replacement;
+}
+
+/*
+ * @brief Limpia todas las reglas de produccion.
+ */
+void LSystem::clearRules() {
+    rules.clear();
 }

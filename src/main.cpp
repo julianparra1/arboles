@@ -1,184 +1,231 @@
-/*
- * =================================================================
- * ARCHIVO: main.cpp
- * CONTENIDO: Punto de entrada de la aplicacion.
- * DESCRIPCION:
- * Este archivo contiene el main() que inicializa GLFW, OpenGL, ImGui
- * y ejecuta el bucle principal de renderizado.
+/**
+ * @file main.cpp
+ * @brief Punto de entrada de la aplicacion del visualizador de plantas L-System.
  *
- * AUTOR: Julian Parra
- * CURSO: Graficacion (2025)
- * PROYECTO: Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
- * =================================================================
+ * Inicializa GLFW, OpenGL, Dear ImGui y ejecuta el bucle principal de renderizado.
+ * Proporciona visualizacion interactiva 3D de plantas generadas por L-System con
+ * controles de camara orbital.
+ *
+ * @author Julian Parra
+ * @date 2025
+ * @course Graficacion
+ * @project Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
  */
 
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 
-#include <array>
+#include <imgui.h>
+
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 
+#include "lsystem/LSystem.h"
+#include "lsystem/TurtleGraphics.h"
 #include "rendering/Camera.h"
-#include "rendering/Shader.h"
 #include "ui/UI.h"
 
-// Constantes para dimensiones de ventana
-constexpr int WINDOW_WIDTH = 800;
-constexpr int WINDOW_HEIGHT = 600;
+// =============================================================================
+// Constantes de Configuracion
+// =============================================================================
 
-// Shaders
-const char* vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "layout (location = 1) in vec3 aColor;\n"
-    "out vec3 vertexColor;\n"
-    "uniform mat4 projection;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = projection * vec4(aPos, 1.0);\n"
-    "   vertexColor = aColor;\n"
-    "}\0";
+constexpr int WINDOW_WIDTH = 1280;
+constexpr int WINDOW_HEIGHT = 720;
+constexpr float INITIAL_CAMERA_DISTANCE = 3.5F;
+constexpr float INITIAL_CAMERA_ANGLE_Y = 20.0F;
 
-const char* fragmentShaderSource =
-    "#version 330 core\n"
-    "in vec3 vertexColor;\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(vertexColor, 1.0f);\n"
-    "}\0";
+// =============================================================================
+// Estado Global para Manejo de Entrada
+// =============================================================================
 
-// Vertices del triangulo equilatero
-// Para un triangulo equilateral con base = 1.0, altura = sqrt(3)/2 ≈ 0.866
-std::array<float, 18> vertices = {
-    // positions                        // colors
-    0.5F,  -0.289F, 0.0F, 1.0F, 0.0F, 0.0F,  // bottom right
-    -0.5F, -0.289F, 0.0F, 0.0F, 1.0F, 0.0F,  // bottom left
-    0.0F,  0.577F,  0.0F, 0.0F, 0.0F, 1.0F   // top
-};
+static bool g_mousePressed = false;
+static double g_lastMouseX = 0.0;
+static double g_lastMouseY = 0.0;
+static float g_cameraDistance = INITIAL_CAMERA_DISTANCE;
+static float g_cameraAngleX = 0.0F;
+static float g_cameraAngleY = INITIAL_CAMERA_ANGLE_Y;
 
-void framebuffer_size_callback(GLFWwindow* /*window*/, int width, int height) {
+// =============================================================================
+// Callbacks de GLFW
+// =============================================================================
+
+void framebufferSizeCallback(GLFWwindow* /*window*/, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, 1);
+void scrollCallback(GLFWwindow* /*window*/, double /*xoffset*/, double yoffset) {
+    g_cameraDistance -= static_cast<float>(yoffset) * 0.2F;
+    g_cameraDistance = std::clamp(g_cameraDistance, 0.3F, 10.0F);
+}
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int /*mods*/) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        ImGuiIO& io = ImGui::GetIO();
+        if (action == GLFW_PRESS && !io.WantCaptureMouse) {
+            g_mousePressed = true;
+            glfwGetCursorPos(window, &g_lastMouseX, &g_lastMouseY);
+        } else if (action == GLFW_RELEASE) {
+            g_mousePressed = false;
+        }
     }
 }
 
+void cursorPositionCallback(GLFWwindow* /*window*/, double xpos, double ypos) {
+    if (g_mousePressed) {
+        float deltaX = static_cast<float>(xpos - g_lastMouseX);
+        float deltaY = static_cast<float>(ypos - g_lastMouseY);
+
+        g_cameraAngleX += deltaX * 0.3F;
+        g_cameraAngleY += deltaY * 0.3F;
+        g_cameraAngleY = std::clamp(g_cameraAngleY, -89.0F, 89.0F);
+
+        g_lastMouseX = xpos;
+        g_lastMouseY = ypos;
+    }
+}
+
+void keyCallback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+}
+
+// =============================================================================
+// Punto de Entrada Principal
+// =============================================================================
+
 int main() {
+    // -------------------------------------------------------------------------
     // Inicializar GLFW
-    if (glfwInit() == 0) {
-        std::cerr << "Failed to initialize GLFW\n";
+    // -------------------------------------------------------------------------
+    if (glfwInit() == GLFW_FALSE) {
+        std::cerr << "ERROR: Fallo al inicializar GLFW\n";
         return -1;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);  // Habilitar MSAA
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    // Crear ventana
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Arboles", nullptr, nullptr);
+    GLFWwindow* window =
+        glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Arboles - The Algorithmic Beauty of Plants",
+                         nullptr, nullptr);
+
     if (window == nullptr) {
-        std::cerr << "Failed to create GLFW window\n";
+        std::cerr << "ERROR: Fallo al crear ventana GLFW\n";
         glfwTerminate();
         return -1;
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    glfwSetScrollCallback(window, scrollCallback);
+    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetCursorPosCallback(window, cursorPositionCallback);
+    glfwSetKeyCallback(window, keyCallback);
 
-    // Cargar OpenGL
+    // -------------------------------------------------------------------------
+    // Inicializar OpenGL via GLAD
+    // -------------------------------------------------------------------------
     if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)) == 0) {
-        std::cerr << "Failed to initialize GLAD\n";
+        std::cerr << "ERROR: Fallo al inicializar GLAD\n";
+        glfwTerminate();
         return -1;
     }
 
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << '\n';
-    std::cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
+    std::cout << "=== Informacion de OpenGL ===\n";
+    std::cout << "Version:  " << glGetString(GL_VERSION) << '\n';
+    std::cout << "GLSL:     " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
+    std::cout << "Renderer: " << glGetString(GL_RENDERER) << '\n';
+    std::cout << "=============================\n\n";
 
+    // Habilitar caracteristicas de OpenGL
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    // Crear shader
-    Shader shader(vertexShaderSource, fragmentShaderSource);
-    if (!shader.isValid()) {
-        std::cerr << "Failed to create shader\n";
+    // -------------------------------------------------------------------------
+    // Inicializar Componentes de Aplicacion
+    // -------------------------------------------------------------------------
+    Camera camera;
+    camera.updatePerspective(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    UI userInterface(window, "#version 330");
+
+    LSystem lsystem;
+
+    TurtleGraphics turtle;
+    if (!turtle.initialize()) {
+        std::cerr << "ERROR: Fallo al inicializar TurtleGraphics\n";
+        glfwTerminate();
         return -1;
     }
 
-    // Crear camara
-    Camera camera;
-    camera.updateProjection(WINDOW_WIDTH, WINDOW_HEIGHT);
+    // -------------------------------------------------------------------------
+    // Generar Planta Inicial (primer preset: Pino 3D)
+    // -------------------------------------------------------------------------
+    lsystem.setAxiom("A");
+    lsystem.addRule('A', "F[&FL!A]/////[&FL!A]///////[&FL!A]");
+    lsystem.setAngle(22.5F);
+    lsystem.generate(6);
+    turtle.set3DMode(true);
+    turtle.setRenderMode(RenderMode::Cylinders);
+    turtle.interpret(lsystem.getString(), lsystem.getAngle());
 
-    // Crear UI
-    UI userInterface(window, "#version 330");
+    std::cout << "Planta inicial generada: " << turtle.getBranchCount() << " ramas\n\n";
 
-    // Configurar buffers de OpenGL
-    GLuint VAO = 0;
-    GLuint VBO = 0;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
+    // Posicion de luz para renderizado 3D
+    glm::vec3 lightPos(5.0F, 8.0F, 5.0F);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-
-    constexpr GLsizei STRIDE = 6;
-    constexpr uintptr_t COLOR_OFFSET = 3 * sizeof(float);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, STRIDE * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(
-        1, 3, GL_FLOAT, GL_FALSE, STRIDE * sizeof(float),
-        reinterpret_cast<void*>(COLOR_OFFSET));  // NOLINT(performance-no-int-to-ptr)
-    glEnableVertexAttribArray(1);
-
-    // Bucle principal
-    while (glfwWindowShouldClose(window) == 0) {
-        processInput(window);
-
-        // Obtener tamaño de framebuffer y actualizar camara
-        int fbWidth = 0;
-        int fbHeight = 0;
+    // -------------------------------------------------------------------------
+    // Bucle Principal de Renderizado
+    // -------------------------------------------------------------------------
+    while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+        // Obtener tamano de framebuffer para camara
+        int fbWidth = 0, fbHeight = 0;
         glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-        camera.updateProjection(fbWidth, fbHeight);
+
+        // Actualizar camara
+        camera.updatePerspective(fbWidth, fbHeight);
+        camera.updateView(g_cameraDistance, g_cameraAngleX, g_cameraAngleY);
 
         // Iniciar frame de UI
         userInterface.beginFrame();
 
-        // Renderizar ventana de debug (solo registra comandos)
+        // Renderizar ventanas de UI
+        userInterface.renderLSystemWindow(turtle, lsystem, [&turtle]() {
+            std::cout << "Planta regenerada: " << turtle.getBranchCount() << " ramas, "
+                      << turtle.getDecorationCount() << " decoraciones\n";
+        });
+        userInterface.renderCameraWindow(g_cameraDistance, g_cameraAngleX, g_cameraAngleY);
         userInterface.renderDebugWindow(window);
 
         // Limpiar pantalla
         const float* bgColor = userInterface.getBackgroundColor();
         glClearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Renderizar triangulo
-        shader.use();
-        shader.setMat4("projection", camera.getProjectionMatrix());
+        // Renderizar la planta
+        turtle.render(camera.getViewMatrix(), camera.getProjectionMatrix(), lightPos);
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        // Finalizar y renderizar UI (encima de todo)
+        // Finalizar frame de UI (renderiza ImGui encima)
         userInterface.endFrame();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    // -------------------------------------------------------------------------
     // Limpieza
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-
+    // -------------------------------------------------------------------------
     glfwTerminate();
+    std::cout << "\nAplicacion terminada exitosamente.\n";
     return 0;
 }

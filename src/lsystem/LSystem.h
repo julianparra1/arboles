@@ -1,19 +1,18 @@
-/*
- * =================================================================
- * ARCHIVO: LSystem.h
- * CONTENIDO: Declaracion de la clase LSystem.
- * DESCRIPCION:
- * Este archivo define la estructura de la clase LSystem, que
- * implementa un sistema de Lindenmayer (D0L-system) para la
- * generacion procedural de cadenas. La clase maneja el alfabeto,
- * el axioma, y las reglas de produccion, aplicando reescritura
- * paralela para simular el crecimiento de plantas.
- * Esta clase NO tiene dependencias de OpenGL.
+/**
+ * @file LSystem.h
+ * @brief Implementacion de Sistema de Lindenmayer (L-System) para generacion procedural.
  *
- * AUTOR: Julian Parra
- * CURSO: Graficacion (2025)
- * PROYECTO: Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas" *
- * =================================================================
+ * Implementa un L-System deterministico y libre de contexto (D0L-system) para
+ * generar cadenas mediante reglas de reescritura paralela. Esta clase maneja
+ * el alfabeto, axioma y reglas de produccion para simular patrones de
+ * crecimiento de plantas.
+ *
+ * Esta clase NO tiene dependencias de OpenGL - solo genera cadenas.
+ *
+ * @author Julian Parra
+ * @date 2025
+ * @course Graficacion
+ * @project Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
  */
 
 #ifndef LSYSTEM_H
@@ -22,10 +21,9 @@
 #include <map>
 #include <string>
 
-/*
+/**
  * @class LSystem
- * @brief Representa un sistema de Lindenmayer (L-System) deterministico
- *        y libre de contexto (D0L-system).
+ * @brief Representa un Sistema de Lindenmayer deterministico y libre de contexto.
  *
  * Un L-System consta de:
  * - Alfabeto (V): conjunto de simbolos (variables y constantes)
@@ -110,6 +108,30 @@ public:
      * @brief Reinicia el L-System al axioma inicial.
      */
     void reset();
+
+    /*
+     * @brief Establece el axioma directamente.
+     * @param newAxiom Nuevo axioma.
+     */
+    void setAxiom(const std::string& newAxiom);
+
+    /*
+     * @brief Establece el angulo directamente.
+     * @param newAngle Nuevo angulo en grados.
+     */
+    void setAngle(float newAngle);
+
+    /*
+     * @brief Agrega una regla de produccion.
+     * @param symbol Simbolo a reemplazar.
+     * @param replacement Cadena de reemplazo.
+     */
+    void addRule(char symbol, const std::string& replacement);
+
+    /*
+     * @brief Limpia todas las reglas de produccion.
+     */
+    void clearRules();
 };
 
 #endif  // LSYSTEM_H

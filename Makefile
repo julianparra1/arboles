@@ -31,7 +31,7 @@ TARGET = arboles
 SRC_DIR = src
 CORE_SOURCES = $(SRC_DIR)/main.cpp
 RENDERING_SOURCES = $(SRC_DIR)/rendering/Shader.cpp $(SRC_DIR)/rendering/Camera.cpp
-LSYSTEM_SOURCES = $(SRC_DIR)/lsystem/LSystem.cpp $(SRC_DIR)/lsystem/TurtleRenderer.cpp
+LSYSTEM_SOURCES = $(SRC_DIR)/lsystem/LSystem.cpp $(SRC_DIR)/lsystem/TurtleGraphics.cpp
 UI_SOURCES = $(SRC_DIR)/ui/UI.cpp
 IMGUI_SOURCES = external/imgui/imgui.cpp external/imgui/imgui_draw.cpp \
                 external/imgui/imgui_tables.cpp external/imgui/imgui_widgets.cpp \

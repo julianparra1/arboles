@@ -1,17 +1,15 @@
-/*
- * =================================================================
- * ARCHIVO: Shader.h
- * CONTENIDO: Declaracion de la clase Shader.
- * DESCRIPCION:
- * Este archivo define la estructura de la clase Shader, que maneja
- * la compilacion, enlazado y uso de shaders de OpenGL. Proporciona
- * una interfaz simple para crear programas de shaders y establecer
- * uniformes.
+/**
+ * @file Shader.h
+ * @brief Manejo de programas de shaders de OpenGL.
  *
- * AUTOR: Julian Parra
- * CURSO: Graficacion (2025)
- * PROYECTO: Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
- * =================================================================
+ * Maneja compilacion, enlazado y uso de shaders GLSL. Proporciona
+ * una interfaz simple para crear programas de shaders y establecer
+ * variables uniform.
+ *
+ * @author Julian Parra
+ * @date 2025
+ * @course Graficacion
+ * @project Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
  */
 
 #ifndef SHADER_H
@@ -24,9 +22,9 @@
 
 /**
  * @class Shader
- * @brief Maneja la compilacion y uso de programas de shaders de OpenGL
+ * @brief Maneja compilacion y uso de programas de shaders de OpenGL.
  *
- * Esta clase encapsula toda la funcionalidad relacionada con shaders:
+ * Encapsula toda la funcionalidad relacionada con shaders:
  * - Compilacion de vertex y fragment shaders
  * - Enlazado de programas
  * - Establecimiento de uniformes

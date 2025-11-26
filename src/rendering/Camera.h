@@ -1,16 +1,15 @@
-/*
- * =================================================================
- * ARCHIVO: Camera.h
- * CONTENIDO: Declaracion de la clase Camera.
- * DESCRIPCION:
- * Este archivo define la clase Camera que maneja las matrices de
- * vista y proyeccion para renderizado 2D y 3D. Proporciona
- * proyeccion ortografica con ajuste de aspecto automatico.
+/**
+ * @file Camera.h
+ * @brief Clase de camara para manejo de matrices de vista y proyeccion.
  *
- * AUTOR: Julian Parra
- * CURSO: Graficacion (2025)
- * PROYECTO: Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
- * =================================================================
+ * Maneja proyeccion ortografica y perspectiva con ajuste automatico
+ * de aspect ratio. Soporta controles de camara orbital para navegacion
+ * de escenas 3D.
+ *
+ * @author Julian Parra
+ * @date 2025
+ * @course Graficacion
+ * @project Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
  */
 
 #ifndef CAMERA_H
@@ -20,10 +19,10 @@
 
 /**
  * @class Camera
- * @brief Maneja las transformaciones de camara para renderizado
+ * @brief Maneja transformaciones de camara para renderizado 2D y 3D.
  *
- * Esta clase calcula y mantiene las matrices de proyeccion y vista,
- * adaptandose automaticamente al aspecto de la ventana.
+ * Calcula y mantiene matrices de proyeccion y vista,
+ * adaptandose automaticamente a cambios de aspect ratio.
  */
 class Camera {
 public:
@@ -33,11 +32,32 @@ public:
     Camera();
 
     /**
-     * @brief Actualiza la matriz de proyeccion basada en el tamaño de ventana
+     * @brief Actualiza la matriz de proyeccion ortografica
      * @param width Ancho del framebuffer
      * @param height Alto del framebuffer
      */
     void updateProjection(int width, int height);
+
+    /**
+     * @brief Actualiza la matriz de proyeccion perspectiva
+     * @param width Ancho del framebuffer
+     * @param height Alto del framebuffer
+     * @param fov Campo de vision en grados
+     * @param near Plano cercano
+     * @param far Plano lejano
+     */
+    void updatePerspective(int width, int height, float fov = 45.0F, float near = 0.1F,
+                           float far = 100.0F);
+
+    /**
+     * @brief Actualiza la matriz de vista usando posicion orbital
+     * @param distance Distancia desde el origen
+     * @param angleX Angulo horizontal (yaw) en grados
+     * @param angleY Angulo vertical (pitch) en grados
+     * @param target Punto al que mira la camara
+     */
+    void updateView(float distance, float angleX, float angleY,
+                    const glm::vec3& target = glm::vec3(0.0F, 0.3F, 0.0F));
 
     /**
      * @brief Obtiene la matriz de proyeccion
@@ -56,6 +76,14 @@ public:
     }
 
     /**
+     * @brief Obtiene la posicion de la camara
+     * @return Posicion 3D de la camara
+     */
+    const glm::vec3& getPosition() const {
+        return m_position;
+    }
+
+    /**
      * @brief Obtiene el ratio de aspecto actual
      * @return Ratio de aspecto (width/height)
      */
@@ -64,9 +92,10 @@ public:
     }
 
 private:
-    glm::mat4 m_projectionMatrix{1.0F};  ///< Matriz de proyeccion
-    glm::mat4 m_viewMatrix{1.0F};        ///< Matriz de vista
-    float m_aspectRatio{1.0F};           ///< Ratio de aspecto actual
+    glm::mat4 m_projectionMatrix{1.0F};      ///< Matriz de proyeccion
+    glm::mat4 m_viewMatrix{1.0F};            ///< Matriz de vista
+    glm::vec3 m_position{0.0F, 0.0F, 3.0F};  ///< Posicion de la camara
+    float m_aspectRatio{1.0F};               ///< Ratio de aspecto actual
 };
 
 #endif  // CAMERA_H

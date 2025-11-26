@@ -1,16 +1,14 @@
-/*
- * =================================================================
- * ARCHIVO: Shader.cpp
- * CONTENIDO: Implementacion de la clase Shader.
- * DESCRIPCION:
- * Este archivo contiene la implementacion de los metodos para compilar,
- * enlazar y usar shaders de OpenGL. Incluye manejo de errores y
- * funciones para establecer uniformes.
+/**
+ * @file Shader.cpp
+ * @brief Implementacion de la clase Shader.
  *
- * AUTOR: Julian Parra
- * CURSO: Graficacion (2025)
- * PROYECTO: Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
- * =================================================================
+ * Contiene metodos para compilar, enlazar y usar shaders de OpenGL.
+ * Incluye manejo de errores y funciones para establecer uniformes.
+ *
+ * @author Julian Parra
+ * @date 2025
+ * @course Graficacion
+ * @project Proyecto Final - "Arboles: La Belleza Algoritmica de las Plantas"
  */
 
 #include "Shader.h"
