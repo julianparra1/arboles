@@ -8,6 +8,9 @@ arboles
 *.a
 *.d
 
+# Presentación (imágenes originales pesadas)
+
+presentacion/
 # ImGui configuration
 imgui.ini
 
